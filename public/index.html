@@ -157,6 +157,16 @@
       color: #856404;
     }
 
+    .hide {
+      display: none;
+    }
+
+    .password-note {
+      margin-top: 12px;
+      color: #4b4b4b;
+      font-size: 14px;
+    }
+
     .result h3 {
       margin-bottom: 8px;
       font-size: 18px;
@@ -219,7 +229,34 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="loginScreen">
+    <div class="header">
+      <h1>🔒 Human Verification Required</h1>
+      <p>To use the email checker, enter the password shown below.</p>
+      <p class="password-note">Password: <strong>IamHuman</strong></p>
+    </div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="loginPassword">Enter Password</label>
+        <input
+          type="password"
+          id="loginPassword"
+          name="loginPassword"
+          placeholder="Type the password shown above"
+          required
+        >
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="verify-btn">Login</button>
+      </div>
+    </form>
+
+    <div class="result" id="loginMessage"></div>
+  </div>
+
+  <div class="container hide" id="appContainer">
     <div class="header">
       <h1>✉️ Email Checker</h1>
       <p>Verify if an email address is active and deliverable</p>
@@ -256,12 +293,70 @@
   </div>
 
   <script>
+    const loginScreen = document.getElementById('loginScreen');
+    const loginForm = document.getElementById('loginForm');
+    const loginPassword = document.getElementById('loginPassword');
+    const loginMessage = document.getElementById('loginMessage');
+    const appContainer = document.getElementById('appContainer');
     const form = document.getElementById('emailForm');
     const emailInput = document.getElementById('email');
     const verifyBtn = document.getElementById('verifyBtn');
     const clearBtn = document.getElementById('clearBtn');
     const loading = document.getElementById('loading');
     const resultDiv = document.getElementById('result');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await attemptLogin();
+    });
+
+    function showLoginResult(message, type) {
+      loginMessage.innerHTML = `<p>${message}</p>`;
+      loginMessage.className = `result show ${type}`;
+    }
+
+    function showApp() {
+      loginScreen.classList.add('hide');
+      appContainer.classList.remove('hide');
+      loginMessage.className = 'result';
+      emailInput.focus();
+    }
+
+    async function attemptLogin() {
+      const password = loginPassword.value.trim();
+
+      if (!password) {
+        showLoginResult('Enter the password shown on this page.', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ password }),
+        });
+
+        if (response.ok) {
+          showApp();
+        } else {
+          showLoginResult('Incorrect password. Please try again.', 'error');
+        }
+      } catch (error) {
+        showLoginResult('Unable to reach the server. Please refresh and try again.', 'error');
+        console.error('Login error:', error);
+      }
+    }
+
+    function isAlreadyAuthenticated() {
+      return document.cookie.includes('emailCheckerAuth=IamHuman');
+    }
+
+    if (isAlreadyAuthenticated()) {
+      showApp();
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();

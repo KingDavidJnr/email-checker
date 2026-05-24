@@ -9,6 +9,75 @@ app.use(morgan("combined"));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
+function sanitizeString(value) {
+  return value
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+    .replace(/<[^>]+>/g, "")
+    .trim();
+}
+
+function enforceStringBody(req, res, next) {
+  if (req.method === "POST" && req.is("application/json")) {
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+      return res.status(400).json({
+        status: "INVALID_REQUEST",
+        message: "Request body must be a JSON object with string values.",
+      });
+    }
+
+    for (const [key, value] of Object.entries(req.body)) {
+      if (typeof value !== "string") {
+        return res.status(400).json({
+          status: "INVALID_REQUEST",
+          message: `Request field \"${key}\" must be a string.`,
+        });
+      }
+      req.body[key] = sanitizeString(value);
+    }
+  }
+
+  next();
+}
+
+app.use(enforceStringBody);
+
+function parseCookies(req) {
+  const raw = req.headers.cookie || "";
+  return raw.split(";").reduce((cookies, cookie) => {
+    const [name, ...rest] = cookie.trim().split("=");
+    if (!name) return cookies;
+    cookies[name] = decodeURIComponent(rest.join("="));
+    return cookies;
+  }, {});
+}
+
+app.post("/login", (req, res) => {
+  const { password } = req.body || {};
+
+  if (typeof password !== "string") {
+    return res.status(400).json({
+      status: "INVALID_REQUEST",
+      message: "Password must be a string.",
+    });
+  }
+
+  if (password === "IamHuman") {
+    res.cookie("emailCheckerAuth", "IamHuman", {
+      sameSite: "Lax",
+      path: "/",
+      maxAge: 1000 * 60 * 60 * 2,
+    });
+    return res.json({ status: "OK" });
+  }
+
+  return res.status(401).json({ status: "INVALID_PASSWORD", message: "Password is incorrect." });
+});
+
+function isAuthenticated(req) {
+  const cookies = parseCookies(req);
+  return cookies.emailCheckerAuth === "IamHuman";
+}
+
 // Helper: Performs a raw interactive SMTP handshake on Port 25
 function checkSmtpInbox(mxServer, email, senderMail) {
   return new Promise((resolve) => {
@@ -59,9 +128,16 @@ function checkSmtpInbox(mxServer, email, senderMail) {
 
 // THE SINGLE CORE VERIFICATION ENDPOINT
 app.post("/verify", async (req, res) => {
+  if (!isAuthenticated(req)) {
+    return res.status(401).json({
+      status: "UNAUTHORIZED",
+      message: "Login required to use the email verification feature.",
+    });
+  }
+
   const { email } = req.body;
 
-  if (!email || !email.includes("@")) {
+  if (typeof email !== "string" || !email.includes("@")) {
     return res.status(400).json({
       status: "INVALID_FORMAT",
       message: "Provide a valid email address string.",
