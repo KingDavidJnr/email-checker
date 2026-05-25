@@ -1,476 +1,325 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monesize Email Checker - Verify Email Addresses</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Verifier</title>
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .container {
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      padding: 50px;
-      max-width: 500px;
-      width: 100%;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .header h1 {
-      color: #333;
-      font-size: 28px;
-      margin-bottom: 10px;
-    }
-
-    .header p {
-      color: #666;
-      font-size: 14px;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      color: #333;
-      font-weight: 600;
-      margin-bottom: 10px;
-      font-size: 14px;
-    }
-
-    input[type="email"] {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: border-color 0.3s;
-      font-family: inherit;
-    }
-
-    input[type="email"]:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 30px;
-    }
-
-    button {
-      flex: 1;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-family: inherit;
-    }
-
-    .verify-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-
-    .verify-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-    }
-
-    .verify-btn:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-
-    .clear-btn {
-      background: #f0f0f0;
-      color: #333;
-    }
-
-    .clear-btn:hover {
-      background: #e0e0e0;
-    }
-
-    .result {
-      margin-top: 30px;
-      padding: 20px;
-      border-radius: 8px;
-      display: none;
-      animation: slideIn 0.3s ease-out;
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
-      to {
-        opacity: 1;
-        transform: translateY(0);
+
+      body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
       }
-    }
 
-    .result.show {
-      display: block;
-    }
-
-    .result.success {
-      background: #d4edda;
-      border: 2px solid #28a745;
-      color: #155724;
-    }
-
-    .result.error {
-      background: #f8d7da;
-      border: 2px solid #dc3545;
-      color: #721c24;
-    }
-
-    .result.warning {
-      background: #fff3cd;
-      border: 2px solid #ffc107;
-      color: #856404;
-    }
-
-    .hide {
-      display: none;
-    }
-
-    .password-note {
-      margin-top: 12px;
-      color: #4b4b4b;
-      font-size: 14px;
-    }
-
-    .result h3 {
-      margin-bottom: 8px;
-      font-size: 18px;
-    }
-
-    .result p {
-      margin: 5px 0;
-      font-size: 14px;
-    }
-
-    .loading {
-      display: none;
-      text-align: center;
-      color: #667eea;
-      margin-top: 20px;
-    }
-
-    .loading.show {
-      display: block;
-    }
-
-    .spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(102, 126, 234, 0.2);
-      border-top-color: #667eea;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .email-display {
-      background: #f8f9fa;
-      padding: 10px 12px;
-      border-radius: 6px;
-      margin-top: 10px;
-      word-break: break-all;
-      font-size: 14px;
-      color: #555;
-    }
-
-    @media (max-width: 600px) {
       .container {
-        padding: 30px 20px;
+        background: #fff;
+        width: 100%;
+        max-width: 520px;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
       }
 
-      .header h1 {
+      .hide {
+        display: none;
+      }
+
+      h1 {
         font-size: 24px;
+        margin-bottom: 8px;
+      }
+      p {
+        color: #666;
+        font-size: 14px;
+      }
+
+      label {
+        display: block;
+        margin: 15px 0 8px;
+        font-weight: 600;
+      }
+
+      input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 15px;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .btns {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
       }
 
       button {
-        padding: 10px 16px;
-        font-size: 14px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container" id="loginScreen">
-    <div class="header">
-      <h1>🔒 Human Verification Required</h1>
-      <p>To use the email checker, enter the password shown below.</p>
-      <p class="password-note">Password: <strong>IamHuman</strong></p>
-    </div>
-
-    <form id="loginForm">
-      <div class="form-group">
-        <label for="loginPassword">Enter Password</label>
-        <input
-          type="password"
-          id="loginPassword"
-          name="loginPassword"
-          placeholder="Type the password shown above"
-          required
-        >
-      </div>
-
-      <div class="button-group">
-        <button type="submit" class="verify-btn">Login</button>
-      </div>
-    </form>
-
-    <div class="result" id="loginMessage"></div>
-  </div>
-
-  <div class="container hide" id="appContainer">
-    <div class="header">
-      <h1>✉️ Email Checker</h1>
-      <p>Verify if an email address is active and deliverable</p>
-    </div>
-
-    <form id="emailForm">
-      <div class="form-group">
-        <label for="email">Enter Email Address</label>
-        <input 
-          type="email" 
-          id="email" 
-          name="email" 
-          placeholder="example@company.com" 
-          required
-        >
-      </div>
-
-      <div class="button-group">
-        <button type="submit" class="verify-btn" id="verifyBtn">
-          Verify Email
-        </button>
-        <button type="button" class="clear-btn" id="clearBtn">
-          Clear
-        </button>
-      </div>
-    </form>
-
-    <div class="loading" id="loading">
-      <div class="spinner"></div>
-      <p>Checking email...</p>
-    </div>
-
-    <div class="result" id="result"></div>
-  </div>
-
-  <script>
-    const loginScreen = document.getElementById('loginScreen');
-    const loginForm = document.getElementById('loginForm');
-    const loginPassword = document.getElementById('loginPassword');
-    const loginMessage = document.getElementById('loginMessage');
-    const appContainer = document.getElementById('appContainer');
-    const form = document.getElementById('emailForm');
-    const emailInput = document.getElementById('email');
-    const verifyBtn = document.getElementById('verifyBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const loading = document.getElementById('loading');
-    const resultDiv = document.getElementById('result');
-
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      await attemptLogin();
-    });
-
-    function showLoginResult(message, type) {
-      loginMessage.innerHTML = `<p>${message}</p>`;
-      loginMessage.className = `result show ${type}`;
-    }
-
-    function showApp() {
-      loginScreen.classList.add('hide');
-      appContainer.classList.remove('hide');
-      loginMessage.className = 'result';
-      emailInput.focus();
-    }
-
-    async function attemptLogin() {
-      const password = loginPassword.value.trim();
-
-      if (!password) {
-        showLoginResult('Enter the password shown on this page.', 'error');
-        return;
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
       }
 
-      try {
-        const response = await fetch('/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+      .primary {
+        background: #667eea;
+        color: white;
+      }
+
+      .secondary {
+        background: #eee;
+      }
+
+      .primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 10px;
+        display: none;
+      }
+
+      .success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #28a745;
+      }
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #dc3545;
+      }
+      .warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffc107;
+      }
+
+      .show {
+        display: block;
+      }
+
+      .email-box {
+        margin-top: 10px;
+        padding: 8px;
+        background: #f5f5f5;
+        border-radius: 6px;
+        font-size: 13px;
+        word-break: break-all;
+      }
+
+      .loading {
+        margin-top: 15px;
+        display: none;
+        color: #667eea;
+      }
+
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 3px solid #ddd;
+        border-top-color: #667eea;
+        border-radius: 50%;
+        display: inline-block;
+        animation: spin 0.8s linear infinite;
+        margin-right: 8px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- LOGIN -->
+    <div class="container" id="loginBox">
+      <h1>🔒 Login Required</h1>
+      <p>Enter password to access email verifier</p>
+
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Enter password" />
+
+      <div class="btns">
+        <button class="primary" onclick="login()">Login</button>
+      </div>
+
+      <div id="loginResult" class="result"></div>
+    </div>
+
+    <!-- APP -->
+    <div class="container hide" id="appBox">
+      <h1>✉️ Email Verifier</h1>
+      <p>SMTP-based email validation (single check mode)</p>
+
+      <label>Email</label>
+      <input type="email" id="email" placeholder="name@company.com" />
+
+      <div class="btns">
+        <button class="primary" id="verifyBtn" onclick="verify()">
+          Verify
+        </button>
+        <button class="secondary" onclick="clearAll()">Clear</button>
+      </div>
+
+      <div class="loading" id="loading">
+        <span class="spinner"></span> Checking SMTP server...
+      </div>
+
+      <div id="result" class="result"></div>
+    </div>
+
+    <script>
+      const loginBox = document.getElementById("loginBox");
+      const appBox = document.getElementById("appBox");
+      const result = document.getElementById("result");
+      const loading = document.getElementById("loading");
+      const verifyBtn = document.getElementById("verifyBtn");
+
+      function setCookie(name, value) {
+        document.cookie = name + "=" + value + "; path=/";
+      }
+
+      function hasAuth() {
+        return document.cookie.includes("emailCheckerAuth=IamHuman");
+      }
+
+      if (hasAuth()) {
+        loginBox.classList.add("hide");
+        appBox.classList.remove("hide");
+      }
+
+      async function login() {
+        const password = document.getElementById("password").value;
+
+        const res = await fetch("/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ password }),
         });
 
-        if (response.ok) {
-          showApp();
+        if (res.ok) {
+          setCookie("emailCheckerAuth", "IamHuman");
+          loginBox.classList.add("hide");
+          appBox.classList.remove("hide");
         } else {
-          showLoginResult('Incorrect password. Please try again.', 'error');
+          showLoginError("Invalid password");
         }
-      } catch (error) {
-        showLoginResult('Unable to reach the server. Please refresh and try again.', 'error');
-        console.error('Login error:', error);
-      }
-    }
-
-    function isAlreadyAuthenticated() {
-      return document.cookie.includes('emailCheckerAuth=IamHuman');
-    }
-
-    if (isAlreadyAuthenticated()) {
-      showApp();
-    }
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      await verifyEmail();
-    });
-
-    clearBtn.addEventListener('click', () => {
-      emailInput.value = '';
-      resultDiv.classList.remove('show');
-      loading.classList.remove('show');
-      emailInput.focus();
-    });
-
-    async function verifyEmail() {
-      const email = emailInput.value.trim();
-
-      if (!email) {
-        showResult('Please enter an email address', 'error');
-        return;
       }
 
-      verifyBtn.disabled = true;
-      loading.classList.add('show');
-      resultDiv.classList.remove('show');
+      function showLoginError(msg) {
+        const el = document.getElementById("loginResult");
+        el.className = "result error show";
+        el.innerHTML = msg;
+      }
 
-      try {
-        const response = await fetch('/verify', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email }),
-        });
+      async function verify() {
+        const email = document.getElementById("email").value;
 
-        const data = await response.json();
-        loading.classList.remove('show');
-        displayResult(data, email);
-      } catch (error) {
-        loading.classList.remove('show');
-        showResult('Failed to verify email. Please try again.', 'error');
-        console.error('Error:', error);
-      } finally {
+        if (!email) return showResult("Enter email", "error");
+
+        verifyBtn.disabled = true;
+        loading.style.display = "block";
+        result.className = "result";
+
+        try {
+          const res = await fetch("/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+
+          const data = await res.json();
+
+          loading.style.display = "none";
+          render(data, email);
+        } catch (e) {
+          loading.style.display = "none";
+          showResult("Network error", "error");
+        }
+
         verifyBtn.disabled = false;
       }
-    }
 
-    function displayResult(data, email) {
-      let status = '';
-      let icon = '';
-      let type = '';
+      function render(data, email) {
+        let type = "warning";
+        let title = "UNKNOWN";
+        let icon = "⚠";
 
-      switch (data.status) {
-        case 'DELIVERABLE':
-          status = 'Email is Valid ✓';
-          icon = '✓';
-          type = 'success';
-          break;
-        case 'UNDELIVERABLE':
-          status = 'Email is Invalid ✗';
-          icon = '✗';
-          type = 'error';
-          break;
-        case 'RISK_CATCH_ALL':
-          status = 'Risky - Catch-All Server ⚠';
-          icon = '⚠';
-          type = 'warning';
-          break;
-        case 'INVALID_FORMAT':
-          status = 'Invalid Format ✗';
-          icon = '✗';
-          type = 'error';
-          break;
-        case 'UNKNOWN_OR_BLOCKED':
-          status = 'Unknown Status ⚠';
-          icon = '⚠';
-          type = 'warning';
-          break;
-        case 'FIREWALL_BLOCKED':
-          status = 'Firewall Blocked ⚠';
-          icon = '⚠';
-          type = 'warning';
-          break;
-        case 'TIMEOUT':
-          status = 'Request Timeout ⚠';
-          icon = '⚠';
-          type = 'warning';
-          break;
-        default:
-          status = 'Unknown Status ⚠';
-          type = 'warning';
+        switch (data.status) {
+          case "DELIVERABLE":
+            type = "success";
+            title = "VALID EMAIL";
+            icon = "✓";
+            break;
+
+          case "UNDELIVERABLE":
+            type = "error";
+            title = "INVALID EMAIL";
+            icon = "✗";
+            break;
+
+          case "TEMPORARY":
+            type = "warning";
+            title = "TEMPORARY ISSUE";
+            icon = "⏳";
+            break;
+
+          case "RISK_CATCH_ALL":
+            type = "warning";
+            title = "CATCH-ALL DOMAIN";
+            icon = "⚠";
+            break;
+
+          case "CONNECTION_FAILED":
+            type = "warning";
+            title = "CONNECTION FAILED";
+            icon = "⚠";
+            break;
+        }
+
+        result.className = `result show ${type}`;
+
+        result.innerHTML = `
+    <h3>${icon} ${title}</h3>
+    <div class="email-box">${email}</div>
+    ${data.reason ? `<p>${data.reason}</p>` : ""}
+    ${data.confidence ? `<p>Confidence: ${data.confidence}</p>` : ""}
+  `;
       }
 
-      let html = `<h3>${icon} ${status}</h3>`;
-      html += `<div class="email-display">${email}</div>`;
-
-      if (data.reason) {
-        html += `<p><strong>Details:</strong> ${data.reason}</p>`;
+      function showResult(msg, type) {
+        result.className = `result show ${type}`;
+        result.innerHTML = msg;
       }
 
-      if (data.message) {
-        html += `<p><strong>Message:</strong> ${data.message}</p>`;
+      function clearAll() {
+        document.getElementById("email").value = "";
+        result.className = "result";
+        loading.style.display = "none";
       }
-
-      resultDiv.innerHTML = html;
-      resultDiv.className = `result show ${type}`;
-    }
-
-    function showResult(message, type) {
-      resultDiv.innerHTML = `<p>${message}</p>`;
-      resultDiv.className = `result show ${type}`;
-    }
-
-    // Focus on input when page loads
-    emailInput.focus();
-  </script>
-</body>
+    </script>
+  </body>
 </html>
